@@ -12,6 +12,71 @@ To write a yacc program to recognize a valid arithmetic expression that uses ope
 7.	Compile these with the C compiler as gcc lex.yy.c y.tab.c
 8.	Enter an arithmetic expression as input and the tokens are identified as output.
 # PROGRAM
+```l
+{
+#include "y.tab.h"
+%}
+
+%%
+
+"="      { printf("\n Operator is EQUAL"); return '='; }
+"+"      { printf("\n Operator is PLUS"); return PLUS; }
+"-"      { printf("\n Operator is MINUS"); return MINUS; }
+"/"      { printf("\n Operator is DIVISION"); return DIVISION; }
+"*"      { printf("\n Operator is MULTIPLICATION"); return MULTIPLICATION;
+}
+[a-zA-Z]*[0-9]* { printf("\n Identifier is %s", yytext); return ID; }
+.        { return yytext[0]; }
+\n       { return 0; }
+
+%%
+```
+```y
+%{
+#include <stdio.h>
+/* This YACC program is for recognizing the Expression */
+void yyerror(const char *s);   // Declare yyerror function correctly
+int yylex(void);               // Declare yylex function
+extern int yylval;             // Declare yylval for token values
+%}
+
+%token ID PLUS MINUS MULTIPLICATION DIVISION
+
+%%
+
+statement: ID '=' E {
+    printf("\nValid arithmetic expression");
+    $$ = $3;
+}
+;
+
+E: E PLUS ID
+ | E MINUS ID
+ | E MULTIPLICATION ID
+ | E DIVISION ID
+ | ID
+;
+
+%%
+
+extern FILE* yyin;
+
+int main() {
+    yyin = stdin;           // Use standard input for parsing
+    int result;             // Declare result variable
+    do {
+        result = yyparse();  // Store the result of yyparse
+    } while (!feof(yyin) && result == 0);  // Continue until EOF or error
+    return result;          // Return the result of yyparse
+}
+
+/* Error handling function */
+void yyerror(const char *s) {
+    fprintf(stderr, "Error: %s\n", s);  // Print the error message
+}
+```
 # OUTPUT
+<img width="323" alt="Screen Shot 1946-07-26 at 12 02 33" src="https://github.com/user-attachments/assets/d2eccefe-4321-4470-9763-ad0e5e3402c0">
+
 # RESULT
 A YACC program to recognize a valid arithmetic expression that uses operator +,-,* and / is executed successfully and the output is verified.
